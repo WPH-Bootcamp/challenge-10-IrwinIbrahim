@@ -1,25 +1,38 @@
-/**
- * Home Page
- * 
- * TODO: Implement homepage sesuai dengan design Figma
- * - Tampilkan daftar artikel blog
- * - Implement search/filter jika diperlukan
- * - Handle loading dan error states
- */
+import { searchPosts } from "@/features/post/post.service";
+import PostCard from "@/components/PostCard";
+import Pagination from "@/components/Pagination";
+import type { Metadata } from "next";
+import type { Post } from "@/features/post/post.types";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: "Home",
+  description: "Read the latest articles from our community",
+};
+
+interface Props {
+  searchParams: { page?: string };
+}
+
+export default async function HomePage({ searchParams }: Props) {
+  const page = Number(searchParams.page ?? 1);
+
+  const posts = await searchPosts("", page, 10);
+
   return (
-    <div className="min-h-screen">
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Blog App Challenge</h1>
-        
-        {/* TODO: Implement blog posts list here */}
-        <div className="space-y-4">
-          <p className="text-gray-600">
-            Mulai implementasi homepage di sini sesuai dengan design Figma!
-          </p>
-        </div>
-      </main>
-    </div>
+    <main className="container">
+      <h1>Recommend For you</h1>
+
+      {posts.data.length === 0 && <p>No posts found</p>}
+
+      {posts.data.map((post: Post) => (
+        <PostCard key={post.id} post={post} />
+      ))}
+
+      <Pagination
+        current={posts.page}
+        total={posts.lastPage}
+        basePath="/"
+      />
+    </main>
   );
 }
